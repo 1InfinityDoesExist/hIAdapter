@@ -15,7 +15,10 @@ public class MultiTenancyInterceptor extends HandlerInterceptorAdapter {
                     Object handler) throws Exception {
         String method = request.getMethod();
         log.info(":::::Method {}", method);
+        // Retrieve PathVariables
         Map attribute = (Map) request.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
+        String tenant = (String) attribute.get("tenantId");
+
         String localAdd = request.getLocalAddr();
         String remoteAdd = request.getRemoteAddr();
 
