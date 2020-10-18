@@ -18,7 +18,7 @@ public class CommonConfig {
         return new RestTemplate(clientHttpRequestFactory());
     }
 
-    @Bean
+
     private ClientHttpRequestFactory clientHttpRequestFactory() {
         HttpComponentsClientHttpRequestFactory factory =
                         new HttpComponentsClientHttpRequestFactory();

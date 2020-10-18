@@ -24,6 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class HlaConsumer {
 
+    // http://localhost:8084/userRole/get/Oauth_Official
     @Autowired
     private RestTemplate restTemplate;
 
@@ -33,7 +34,7 @@ public class HlaConsumer {
     @Value("${oauth2.port:8084}")
     private int port;
 
-    @Value("${oauth2.url:/userRole/create")
+    @Value("${oauth2.url:/userRole/get/{userRole}}")
     private String oauth2Url;
 
     @Value("${oauth2.protocol:http}")
@@ -44,29 +45,35 @@ public class HlaConsumer {
         TokenDetails tokenDetails = getTokenDetails(record.value().toString());
     }
 
-    @KafkaListener(topics = "userInfo",
+    @KafkaListener(topics = "userRole",
                     containerFactory = "concurrentKafkaListenerContainerFactory")
     public void persistUserRole(ConsumerRecord<Object, Object> record) {
-        String tenantDetails = record.value().toString();
-        persistUserRoleInDB(tenantDetails);
+        log.info("::::HlaConsumer Class, persistUserRole method::::");
+        String userRole = record.value().toString();
+        log.info(":::::tenantDetails {}", userRole);
+        persistUserRoleInDB(userRole);
 
     }
 
     private void persistUserRoleInDB(String tenantDetails) {
+        log.info(":::::HlaConsumer Class, persistUserRoleInDB method:::::");
         URIBuilder uriBuilder = new URIBuilder();
         uriBuilder.setScheme(oauth2Protocol);
         uriBuilder.setHost(oauth2Host);
         uriBuilder.setPort(port);
-        uriBuilder.setPath(oauth2Url);
+        uriBuilder.setPath(oauth2Url.replace("{userRole}", "Oauth_Official"));
         try {
             URL url = uriBuilder.build().toURL();
+            log.info(":::::url {}", url);
             UriComponentsBuilder uriComponentBuilder = UriComponentsBuilder.fromUri(url.toURI());
+            log.info(":::::uriComponentBuilder {}", uriComponentBuilder.toUriString());
 
             HttpHeaders headers = new HttpHeaders();
             HttpEntity<String> httpEntity = new HttpEntity<>(headers);
             ResponseEntity<ModelMap> responseEntity =
-                            restTemplate.exchange(uriComponentBuilder.toString(), HttpMethod.POST,
+                            restTemplate.exchange(uriComponentBuilder.toUriString(), HttpMethod.GET,
                                             httpEntity, ModelMap.class);
+            log.info(":::::responseEntity {}", responseEntity.getBody());
         } catch (MalformedURLException | URISyntaxException e) {
             e.printStackTrace();
         }

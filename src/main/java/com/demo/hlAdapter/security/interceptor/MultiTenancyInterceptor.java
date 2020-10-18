@@ -12,9 +12,6 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class MultiTenancyInterceptor extends HandlerInterceptorAdapter {
 
-    @Autowired
-    private HlaProducer hlaProducer;
-
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response,
                     Object handler) throws Exception {
@@ -30,7 +27,6 @@ public class MultiTenancyInterceptor extends HandlerInterceptorAdapter {
         String authorization = request.getHeader("authorization");
         log.info(":::::localAdd {}, remoteAdd {}", localAdd, remoteAdd);
         log.info("::::authorization {}", authorization);
-        hlaProducer.sendMessage("token", authorization);
         return true;
     }
 }
